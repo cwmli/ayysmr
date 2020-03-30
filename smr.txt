@@ -1,0 +1,21 @@
+Spotify Music Recommendation
+
+Recommends based on:
+- based on recent play history
+- top artists and tracks over some time frame (long, medium, short term)
+
+Adjust recommendations based on:
+
+Changing the weights of the model
+
+
+
+
+GOAL:
+The user "LIKES" (will add) the song -> check users saved songs?
+
+Features
+
+- Genres
+- tempo/danceability/mood
+- language (?)
