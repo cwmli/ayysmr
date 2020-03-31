@@ -1,8 +1,8 @@
-"""Create tracks and users table
+"""empty message
 
-Revision ID: a79965ad24b0
+Revision ID: 6a240b2940e3
 Revises: 
-Create Date: 2020-03-30 11:28:42.987266
+Create Date: 2020-03-31 13:56:08.126393
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'a79965ad24b0'
+revision = '6a240b2940e3'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -41,8 +41,8 @@ def upgrade():
     )
     op.create_table('Users',
     sa.Column('id', sa.String(length=32), nullable=False),
-    sa.Column('access_token', sa.String(length=120), nullable=True),
-    sa.Column('refresh_token', sa.String(length=120), nullable=True),
+    sa.Column('access_token', sa.Text(), nullable=True),
+    sa.Column('refresh_token', sa.Text(), nullable=True),
     sa.Column('expire_time', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')

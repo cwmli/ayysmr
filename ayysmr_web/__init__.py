@@ -8,14 +8,14 @@ from ayysmr_web.sy import sy
 
 def create_app(config=None):
     app = Flask(__name__, instance_relative_config=True)
-    app.secret_key = 'bae16c495318337df4ce4f67cc3a1e5e'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://calvinli@localhost/ayysmr'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     if config is None:
-        app.config.from_pyfile('./configs/default.py', silent=True)
+        app.config.from_pyfile('./configs/default.cfg', silent=True)
     else:
         app.config.from_mapping(config)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    app.secret_key = app.config['APP_SECRET_KEY']
 
     db.init_app(app)
     migrate.init_app(app, db)

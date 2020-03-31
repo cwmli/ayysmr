@@ -1,5 +1,4 @@
-import urllib.request
-import urllib.error
+import requests
 import urllib.parse
 import secrets
 import base64
@@ -9,6 +8,8 @@ from models.track import Track
 from models.user import User
 
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
+from flask import current_app as app
+from sqlalchemy.sql import exists
 
 sy = Blueprint('sy', __name__, url_prefix='/sy')
 
@@ -18,9 +19,9 @@ def enable():
     scopes = ['user-read-recently-played', 'user-top-read']
     
     qparams = {
-        "client_id": "",
+        "client_id": app.config['SY_CLIENT_ID'],
         "response_type": "code",
-        "redirect_uri": url_for("sy.callback"),
+        "redirect_uri": url_for("sy.callback", _external = True),
         "state": session['state'],
         "scope": " ".join(scopes)
     }
@@ -37,39 +38,86 @@ def callback():
         bparams = {
             "grant_type": "authorization_code",
             "code": authcode,
-            "redirect_uri": url_for("sy.callback")
+            "redirect_uri": url_for("sy.callback", _external = True),
+            "client_id": app.config['SY_CLIENT_ID'],
+            "client_secret": app.config['SY_CLIENT_SECRET']
         }
 
-        accessTokReq = urllib.request.Request(\
-            "https://accounts.spotify.com/api/token",
-            bparams,
-            { "Authorization": "Basic {}".format(base64.b64encode("client_id:client_secret")) },
-            method = 'POST')
+        try:
+            response = requests.post(
+                "https://accounts.spotify.com/api/token",
+                data = bparams).json()
 
-        response = urllib.request.urlopen(accessTokReq)
+            accessToken = response['access_token']
+            expireTime = response['expires_in']
+            refreshToken = response['refresh_token']
 
-        accessToken = response['access_token']
-        expireTime = response['expires_in']
-        refreshToken = response['refresh_token']
+            if accessToken == None:
+                flash("Failed to authorize")
 
-        if accessToken == None:
-            flash("Failed to authorize")
+            # Request associated user id
+            response = requests.get(
+                "https://api.spotify.com/v1/me",
+                headers = { "Authorization": "Bearer {}".format(accessToken) }).json()
+            userId = response['id'] 
+           
+            # Add or update user tokens
+            if db.session.query(exists().where(User.id == userId)).scalar() is not None:
+                user = User(id = userId, access_token = accessToken, refresh_token = refreshToken, expire_time = expireTime)
+                db.session.add(user)
+                db.session.commit()
+            else:
+                user = User.query().filter(User.id == userId).first()
+                user.access_token = accessToken
+                user.refresh_token = refreshToken
+                user.expire_time = expireTime
+                db.session.commit()
 
-        # Request associated user id
-        userProfileReq = urllib.request.Request(\
-            "https://api.spotify.com/v1/me",
-            { "Authorization": "Bearer {}".format(accessToken) })
-        userId = urllib.request.urlopen(userProfileReq)['id']
+            session['user'] = userId
+            session['access_token'] = accessToken
+            session['expire_time'] = expireTime
 
-        user = User(id = userId, access_token = accessToken, refresh_token = refreshToken, expire_time = expireTime)
-        db.session.add(user)
-        db.session.commit()
-
-        session['access_token'] = accessToken
-        session['expire_time'] = expireTime
-        session['refresh_token'] = refreshToken
+        except requests.HTTPError as err:
+            flash("{} {}".format(err.msg, err.reason))
 
     else:
         flash("Invalid state")
 
-    return redirect(url_for('index'))
+    return redirect(url_for('hello'))
+
+@sy.route('/refresh')
+def refresh():
+    if not session['user']:
+
+        user = User.query().filter(User.id == session['user']).first()
+
+        # Exchange refresh token for access token
+        bparams = {
+            "grant_type": "refresh_token",
+            "refresh_token": user.refresh_token,
+            "redirect_uri": url_for("sy.callback"),
+            "client_id": app.config['SY_CLIENT_ID'],
+            "client_secret": app.config['SY_CLIENT_SECRET']
+        }
+
+        response = requests.post(
+            "https://accounts.spotify.com/api/token",
+            data = bparams).json()
+
+        # Update access token and expire times
+        accessToken = response['access_token']
+        expireTime = response['expires_in']
+
+        if accessToken == None:
+            flash("Failed to refresh access token")
+
+        user.access_token = accessToken
+        user.expire_time = expireTime
+        db.session.commit()
+
+        session['access_token'] = accessToken
+        session['expire_time'] = expireTime
+    else:
+        flash("Invalid user session")
+
+    return redirect(url_for('hello'))
