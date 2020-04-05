@@ -1,4 +1,4 @@
-from ayysmr_web import db
+from ayysmr_web.store import db
 
 class User(db.Model):
     __tablename__ = 'Users'

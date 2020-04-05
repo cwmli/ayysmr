@@ -1,11 +1,12 @@
 from sqlalchemy.dialects.postgresql import ARRAY
 
-from ayysmr_web import db
+from ayysmr_web.store import db
 
 class Track(db.Model):
     __tablename__ = 'Tracks'
 
     id = db.Column(db.String(32), unique = True, primary_key = True, nullable = False)
+    name = db.Column(db.String(120))
     artist = db.Column(db.String(32))
     preview_url = db.Column(db.String(120))
 
@@ -20,7 +21,7 @@ class Track(db.Model):
     mode = db.Column(db.Float())
     speechiness = db.Column(db.Float())
     acousticness = db.Column(db.Float())
-    instrumnetalness = db.Column(db.Float())
+    instrumentalness = db.Column(db.Float())
     liveness = db.Column(db.Float())
     valence = db.Column(db.Float())
     tempo = db.Column(db.Float())

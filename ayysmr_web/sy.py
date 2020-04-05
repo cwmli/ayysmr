@@ -3,13 +3,13 @@ import urllib.parse
 import secrets
 import base64
 
-from ayysmr_web.store import db
-from models.track import Track
-from models.user import User
-
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
-from flask import current_app as app
+from flask import current_app
 from sqlalchemy.sql import exists
+
+from .store import db
+from .models.user import User
+from .jobs.tracks import retTopTracks
 
 sy = Blueprint('sy', __name__, url_prefix='/sy')
 
@@ -19,7 +19,7 @@ def enable():
     scopes = ['user-read-recently-played', 'user-top-read']
     
     qparams = {
-        "client_id": app.config['SY_CLIENT_ID'],
+        "client_id": current_app.config['SY_CLIENT_ID'],
         "response_type": "code",
         "redirect_uri": url_for("sy.callback", _external = True),
         "state": session['state'],
@@ -39,8 +39,8 @@ def callback():
             "grant_type": "authorization_code",
             "code": authcode,
             "redirect_uri": url_for("sy.callback", _external = True),
-            "client_id": app.config['SY_CLIENT_ID'],
-            "client_secret": app.config['SY_CLIENT_SECRET']
+            "client_id": current_app.config['SY_CLIENT_ID'],
+            "client_secret": current_app.config['SY_CLIENT_SECRET']
         }
 
         try:
@@ -62,12 +62,14 @@ def callback():
             userId = response['id'] 
            
             # Add or update user tokens
-            if db.session.query(exists().where(User.id == userId)).scalar() is not None:
+            if db.session.query(exists().where(User.id == userId)).scalar() is False:
                 user = User(id = userId, access_token = accessToken, refresh_token = refreshToken, expire_time = expireTime)
                 db.session.add(user)
                 db.session.commit()
+                # trigger top tracks job for first time user
+                retTopTracks.delay(accessToken)
             else:
-                user = User.query().filter(User.id == userId).first()
+                user = User.query.filter(User.id == userId).first()
                 user.access_token = accessToken
                 user.refresh_token = refreshToken
                 user.expire_time = expireTime
@@ -96,8 +98,8 @@ def refresh():
             "grant_type": "refresh_token",
             "refresh_token": user.refresh_token,
             "redirect_uri": url_for("sy.callback"),
-            "client_id": app.config['SY_CLIENT_ID'],
-            "client_secret": app.config['SY_CLIENT_SECRET']
+            "client_id": current_app.config['SY_CLIENT_ID'],
+            "client_secret": current_app.config['SY_CLIENT_SECRET']
         }
 
         response = requests.post(
