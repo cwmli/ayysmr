@@ -5,6 +5,9 @@ from ayysmr_web.store import db
 class Track(db.Model):
     __tablename__ = 'Tracks'
 
+    # TODO: Add a timestamp to distinguish between duplicate entries
+    # a user can listen to a song more than once, and it will be 
+    # represented in the database
     id = db.Column(db.String(32), unique = True, primary_key = True, nullable = False)
     name = db.Column(db.String(120))
     artist = db.Column(db.String(32))

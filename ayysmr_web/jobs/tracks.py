@@ -41,30 +41,32 @@ def retPlayHistory(self, start, batchsize):
     for user in users:
         reqHeader = { "Authorization": "Bearer {}".format(user.access_token) }
 
+        tracks = []
         for _retry in range(3):
             try:
-                # TODO: Add paging functionality in the case where the user has listened to over 50
+                # Paging in the case where the user has listened to over 50
                 # songs within the last update
-                response = requests.get(
-                    "https://api.spotify.com/v1/me/player/recently-played",
-                    headers = reqHeader,
-                    params = {
-                        "limit": 50,
-                        "after": int(user.last_play_history_upd.timestamp() * 1000)
-                    }).json()
-                # the access_token for the user is unauthorized, get the refresh token
-                if 'error' in response and response['error']['status'] == 401:
-                    raise UnauthorizedUser
+                time = int(user.last_play_history_upd.timestamp() * 1000)
+                while True:
+                    response = requests.get(
+                        "https://api.spotify.com/v1/me/player/recently-played",
+                        headers = reqHeader,
+                        params = {
+                            "limit": 50,
+                            "after": time
+                        }).json()
+                    # the access_token for the user is unauthorized, get the refresh token
+                    if 'error' in response and response['error']['status'] == 401:
+                        raise UnauthorizedUser
+                    # otherwise we were successful dump this into Tracks
+                    if not response['items']:
+                        break
 
-                # otherwise we were successful dump this into Tracks
-                items = map(lambda i: i['track'], response['items'])
-                tracks = extractTrackInformation(items, user.access_token)
+                    items = map(lambda i: i['track'], response['items'])
+                    tracks = tracks + extractTrackInformation(items, user.access_token)
+                    time = response['cursors']['after']
 
-                user.last_play_history_upd = datetime.utcnow().isoformat()
-                s.bulk_save_objects(tracks)
-                s.commit()
-                s.close()
-
+                # exit retry loop
                 break
 
             except UnauthorizedUser:
@@ -93,6 +95,12 @@ def retPlayHistory(self, start, batchsize):
                 db.session.commit()
 
                 continue
+        
+        # commit play history and update time for the user
+        user.last_play_history_upd = datetime.utcnow().isoformat()
+        s.bulk_save_objects(tracks)
+        s.commit()
+        s.close()
 
 """
 extractTrackInformation(items)
