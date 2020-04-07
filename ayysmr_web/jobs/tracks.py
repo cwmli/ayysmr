@@ -7,7 +7,7 @@ from ayysmr_web.models.user import User
 from ayysmr_web.store import celery, db
 
 @celery.task
-def retTopTracks(self, access_token):
+def retTopTracks(access_token):
 
     reqHeader = { "Authorization": "Bearer {}".format(access_token) }
 

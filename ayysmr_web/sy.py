@@ -66,7 +66,6 @@ def callback():
                 db.session.add(user)
                 db.session.commit()
                 # trigger top tracks job for first time user
-                # TODO: Seem to be getting an error here, do some testing
                 retTopTracks.delay(accessToken)
             else:
                 user = User.query.filter(User.id == userId).first()
