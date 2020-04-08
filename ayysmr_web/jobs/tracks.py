@@ -4,7 +4,8 @@ from flask import current_app, url_for
 
 from ayysmr_web.models.track import Track
 from ayysmr_web.models.user import User
-from ayysmr_web.store import celery, db
+from ayysmr_web.store import db
+from .tasks import celery
 
 @celery.task
 def retTopTracks(access_token):
@@ -30,77 +31,86 @@ def retTopTracks(access_token):
 
 # TODO: Make this a periodic task
 @celery.task(bind = True)
-def retPlayHistory(self, start, batchsize):
+def retPlayHistory(self, start, batchsize, taskcount):
 
     class UnauthorizedUser(requests.RequestException):
         pass
 
     s = db.create_scoped_session()
-    users = s.query(User).limit(batchsize).offset(start).all()
+
+    index = start
     
-    for user in users:
-        reqHeader = { "Authorization": "Bearer {}".format(user.access_token) }
-
-        tracks = []
-        for _retry in range(3):
-            try:
-                # Paging in the case where the user has listened to over 50
-                # songs within the last update
-                time = int(user.last_play_history_upd.timestamp() * 1000)
-                while True:
-                    response = requests.get(
-                        "https://api.spotify.com/v1/me/player/recently-played",
-                        headers = reqHeader,
-                        params = {
-                            "limit": 50,
-                            "after": time
-                        }).json()
-                    # the access_token for the user is unauthorized, get the refresh token
-                    if 'error' in response and response['error']['status'] == 401:
-                        raise UnauthorizedUser
-                    # otherwise we were successful dump this into Tracks
-                    if not response['items']:
-                        break
-
-                    items = map(lambda i: i['track'], response['items'])
-                    tracks = tracks + extractTrackInformation(items, user.access_token)
-                    time = response['cursors']['after']
-
-                # exit retry loop
-                break
-
-            except UnauthorizedUser:
-                # Exchange refresh token for access token
-                bparams = {
-                    "grant_type": "refresh_token",
-                    "refresh_token": user.refresh_token,
-                    "redirect_uri": url_for("sy.callback", _external = True),
-                    "client_id": current_app.config['SY_CLIENT_ID'],
-                    "client_secret": current_app.config['SY_CLIENT_SECRET']
-                }
-
-                response = requests.post(
-                    "https://accounts.spotify.com/api/token",
-                    data = bparams).json()
-
-                # Update access token and expire times
-                accessToken = response['access_token']
-                expireTime = response['expires_in']
-
-                if accessToken == None:
-                    return "Failed to refresh access token"
-
-                user.access_token = accessToken
-                user.expire_time = expireTime
-                db.session.commit()
-
-                continue
+    while True:
+        users = s.query(User).limit(batchsize).offset(index).all()
         
-        # commit play history and update time for the user
-        user.last_play_history_upd = datetime.utcnow().isoformat()
-        s.bulk_save_objects(tracks)
-        s.commit()
-        s.close()
+        if not users:
+            break
+
+        for user in users:
+            reqHeader = { "Authorization": "Bearer {}".format(user.access_token) }
+
+            tracks = []
+            for _retry in range(3):
+                try:
+                    # Paging in the case where the user has listened to over 50
+                    # songs within the last update
+                    time = int(user.last_play_history_upd.timestamp() * 1000)
+                    while True:
+                        response = requests.get(
+                            "https://api.spotify.com/v1/me/player/recently-played",
+                            headers = reqHeader,
+                            params = {
+                                "limit": 50,
+                                "after": time
+                            }).json()
+                        # the access_token for the user is unauthorized, get the refresh token
+                        if 'error' in response and response['error']['status'] == 401:
+                            raise UnauthorizedUser
+                        # otherwise we were successful dump this into Tracks
+                        if not response['items']:
+                            break
+
+                        items = map(lambda i: i['track'], response['items'])
+                        tracks = tracks + extractTrackInformation(items, user.access_token)
+                        time = response['cursors']['after']
+
+                    # exit retry loop
+                    break
+
+                except UnauthorizedUser:
+                    # Exchange refresh token for access token
+                    bparams = {
+                        "grant_type": "refresh_token",
+                        "refresh_token": user.refresh_token,
+                        "redirect_uri": url_for("sy.callback", _external = True),
+                        "client_id": current_app.config['SY_CLIENT_ID'],
+                        "client_secret": current_app.config['SY_CLIENT_SECRET']
+                    }
+
+                    response = requests.post(
+                        "https://accounts.spotify.com/api/token",
+                        data = bparams).json()
+
+                    # Update access token and expire times
+                    accessToken = response['access_token']
+                    expireTime = response['expires_in']
+
+                    if accessToken == None:
+                        return "Failed to refresh access token"
+
+                    user.access_token = accessToken
+                    user.expire_time = expireTime
+                    db.session.commit()
+
+                    continue
+            
+            # commit play history and update time for the user
+            user.last_play_history_upd = datetime.utcnow().isoformat()
+            s.bulk_save_objects(tracks)
+            s.commit()
+            s.close()
+
+        index = index + batchsize * taskcount
 
 """
 extractTrackInformation(items)
