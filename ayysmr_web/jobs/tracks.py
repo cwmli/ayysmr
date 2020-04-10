@@ -29,7 +29,6 @@ def retTopTracks(access_token):
     s.commit()
     s.close()
 
-# TODO: Make this a periodic task
 @celery.task(bind = True)
 def retPlayHistory(self, start, batchsize, taskcount):
 
