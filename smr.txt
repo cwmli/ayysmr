@@ -19,3 +19,11 @@ Features
 - Genres
 - tempo/danceability/mood
 - language (?)
+
+Run celery worker:
+
+celery worker -A worker.celery -B --loglevel=info   
+
+Run app:
+
+python3 app.py

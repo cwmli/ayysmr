@@ -1,5 +1,5 @@
 from .app import *
-from .store import celery
+from .jobs.tasks import celery
 
 def create_app(mode):
     app = make_app()
