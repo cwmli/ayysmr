@@ -1,7 +1,7 @@
 import ayysmr_web.sy
 import ayysmr_web.jobs.tracks
 
-from tests.fixtures.sy import mock_get_access_token, mock_get_user_profile, mock_get_db
+from .fixtures.sy import mock_get_access_token, mock_get_user_profile, mock_get_db
 
 # Testing behavior of /sy/callback endpoint
 # in cases where there is an invalid/non-existent state,
