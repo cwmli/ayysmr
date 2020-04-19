@@ -1,7 +1,6 @@
 import pytest
-import sqlalchemy.orm.query
 
-import ayysmr_web.sy
+import ayysmr_web
 
 @pytest.fixture
 def mock_get_access_token(monkeypatch):

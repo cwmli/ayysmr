@@ -8,9 +8,6 @@ Adjust recommendations based on:
 
 Changing the weights of the model
 
-
-
-
 GOAL:
 The user "LIKES" (will add) the song -> check users saved songs?
 
@@ -20,10 +17,18 @@ Features
 - tempo/danceability/mood
 - language (?)
 
-Run celery worker:
+Run celery worker with beat:
 
 celery worker -A worker.celery -B --loglevel=info   
 
 Run app:
 
 python3 app.py
+
+To run tests:
+
+python -m pytest tests/(integration|unit)
+
+Restart RabbitMQ Service:
+
+brew services restart rabbitmq

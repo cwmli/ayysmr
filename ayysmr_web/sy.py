@@ -48,7 +48,7 @@ def callback():
             result = spotify.get_user_profile(accessToken)
             userId = result.get('id')
             
-            _update_user_tokens(userId)
+            _update_user_tokens(userId, accessToken, expireTime, refreshToken)
 
             session['user'] = userId
             session['access_token'] = accessToken
