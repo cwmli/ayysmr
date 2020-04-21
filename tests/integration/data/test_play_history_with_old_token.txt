@@ -1,0 +1,337 @@
+[{
+    "error": {
+        "status": 401
+    }
+},
+
+
+{
+   "access_token": "newtoken",
+   "token_type": "Bearer",
+   "scope": "user-read-private user-read-email",
+   "expires_in": 0
+},
+
+
+{
+  "items": [
+    {
+      "track": {
+        "album": {
+          "album_type": "single",
+          "artists": [
+            {
+              "external_urls": {
+                "spotify": "https://open.spotify.com/artist/1JdJprpKvNgqBLGSDrMsv9"
+              },
+              "href": "https://api.spotify.com/v1/artists/1JdJprpKvNgqBLGSDrMsv9",
+              "id": "1JdJprpKvNgqBLGSDrMsv9",
+              "name": "SUNG DAM",
+              "type": "artist",
+              "uri": "spotify:artist:1JdJprpKvNgqBLGSDrMsv9"
+            }
+          ],
+          "available_markets": [
+            "AD",
+            "AE",
+            "AR",
+            "AT",
+            "AU",
+            "BE",
+            "BG",
+            "BH",
+            "BO",
+            "BR",
+            "CA",
+            "CH",
+            "CL",
+            "CO",
+            "CR",
+            "CY",
+            "CZ",
+            "DE",
+            "DK",
+            "DO",
+            "DZ",
+            "EC",
+            "EE",
+            "EG",
+            "ES",
+            "FI",
+            "FR",
+            "GB",
+            "GR",
+            "GT",
+            "HK",
+            "HN",
+            "HU",
+            "ID",
+            "IE",
+            "IL",
+            "IN",
+            "IS",
+            "IT",
+            "JO",
+            "JP",
+            "KW",
+            "LB",
+            "LI",
+            "LT",
+            "LU",
+            "LV",
+            "MA",
+            "MC",
+            "MT",
+            "MX",
+            "MY",
+            "NI",
+            "NL",
+            "NO",
+            "NZ",
+            "OM",
+            "PA",
+            "PE",
+            "PH",
+            "PL",
+            "PS",
+            "PT",
+            "PY",
+            "QA",
+            "RO",
+            "SA",
+            "SE",
+            "SG",
+            "SK",
+            "SV",
+            "TH",
+            "TN",
+            "TR",
+            "TW",
+            "US",
+            "UY",
+            "VN",
+            "ZA"
+          ],
+          "external_urls": {
+            "spotify": "https://open.spotify.com/album/02Zu61VS0aWlGGU9vPwAmD"
+          },
+          "href": "https://api.spotify.com/v1/albums/02Zu61VS0aWlGGU9vPwAmD",
+          "id": "02Zu61VS0aWlGGU9vPwAmD",
+          "images": [
+            {
+              "height": 640,
+              "url": "https://i.scdn.co/image/ab67616d0000b273578e87212eab122aac377c0b",
+              "width": 640
+            },
+            {
+              "height": 300,
+              "url": "https://i.scdn.co/image/ab67616d00001e02578e87212eab122aac377c0b",
+              "width": 300
+            },
+            {
+              "height": 64,
+              "url": "https://i.scdn.co/image/ab67616d00004851578e87212eab122aac377c0b",
+              "width": 64
+            }
+          ],
+          "name": "The Moon Remembers",
+          "release_date": "2020-01-24",
+          "release_date_precision": "day",
+          "total_tracks": 4,
+          "type": "album",
+          "uri": "spotify:album:02Zu61VS0aWlGGU9vPwAmD"
+        },
+        "artists": [
+          {
+            "external_urls": {
+              "spotify": "https://open.spotify.com/artist/1JdJprpKvNgqBLGSDrMsv9"
+            },
+            "href": "https://api.spotify.com/v1/artists/1JdJprpKvNgqBLGSDrMsv9",
+            "id": "1JdJprpKvNgqBLGSDrMsv9",
+            "name": "SUNG DAM",
+            "type": "artist",
+            "uri": "spotify:artist:1JdJprpKvNgqBLGSDrMsv9"
+          }
+        ],
+        "available_markets": [
+          "AD",
+          "AE",
+          "AR",
+          "AT",
+          "AU",
+          "BE",
+          "BG",
+          "BH",
+          "BO",
+          "BR",
+          "CA",
+          "CH",
+          "CL",
+          "CO",
+          "CR",
+          "CY",
+          "CZ",
+          "DE",
+          "DK",
+          "DO",
+          "DZ",
+          "EC",
+          "EE",
+          "EG",
+          "ES",
+          "FI",
+          "FR",
+          "GB",
+          "GR",
+          "GT",
+          "HK",
+          "HN",
+          "HU",
+          "ID",
+          "IE",
+          "IL",
+          "IN",
+          "IS",
+          "IT",
+          "JO",
+          "JP",
+          "KW",
+          "LB",
+          "LI",
+          "LT",
+          "LU",
+          "LV",
+          "MA",
+          "MC",
+          "MT",
+          "MX",
+          "MY",
+          "NI",
+          "NL",
+          "NO",
+          "NZ",
+          "OM",
+          "PA",
+          "PE",
+          "PH",
+          "PL",
+          "PS",
+          "PT",
+          "PY",
+          "QA",
+          "RO",
+          "SA",
+          "SE",
+          "SG",
+          "SK",
+          "SV",
+          "TH",
+          "TN",
+          "TR",
+          "TW",
+          "US",
+          "UY",
+          "VN",
+          "ZA"
+        ],
+        "disc_number": 1,
+        "duration_ms": 251066,
+        "explicit": false,
+        "external_ids": {
+          "isrc": "KRA302000066"
+        },
+        "external_urls": {
+          "spotify": "https://open.spotify.com/track/011zOYpFPsb1MLCidWlRoZ"
+        },
+        "href": "https://api.spotify.com/v1/tracks/011zOYpFPsb1MLCidWlRoZ",
+        "id": "011zOYpFPsb1MLCidWlRoZ",
+        "is_local": false,
+        "name": "Crescent Moon",
+        "popularity": 12,
+        "preview_url": "https://p.scdn.co/mp3-preview/668b7ba8b3e5fcbb74b5650c594dcb491276c0ee?cid=774b29d4f13844c495f206cafdad9c86",
+        "track_number": 3,
+        "type": "track",
+        "uri": "spotify:track:011zOYpFPsb1MLCidWlRoZ"
+      },
+      "played_at": "2020-04-20T21:06:17.120Z",
+      "context": null
+    }
+  ],
+  "next": "https://api.spotify.com/v1/me/player/recently-played?before=1587416777120&limit=1&type=track",
+  "cursors": {
+    "after": "1587416777120",
+    "before": "1587416777120"
+  },
+  "limit": 1,
+  "href": "https://api.spotify.com/v1/me/player/recently-played?limit=1&type=track"
+},
+
+
+{
+  "audio_features": [
+    {
+      "danceability": 0.599,
+      "energy": 0.335,
+      "key": 0,
+      "loudness": -7.446,
+      "mode": 1,
+      "speechiness": 0.0259,
+      "acousticness": 0.803,
+      "instrumentalness": 0,
+      "liveness": 0.0938,
+      "valence": 0.428,
+      "tempo": 77.876,
+      "type": "audio_features",
+      "id": "011zOYpFPsb1MLCidWlRoZ",
+      "uri": "spotify:track:011zOYpFPsb1MLCidWlRoZ",
+      "track_href": "https://api.spotify.com/v1/tracks/011zOYpFPsb1MLCidWlRoZ",
+      "analysis_url": "https://api.spotify.com/v1/audio-analysis/011zOYpFPsb1MLCidWlRoZ",
+      "duration_ms": 251067,
+      "time_signature": 4
+    }
+  ]
+},
+
+
+{
+  "artists": [
+    {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/artist/1JdJprpKvNgqBLGSDrMsv9"
+      },
+      "followers": {
+        "href": null,
+        "total": 1006
+      },
+      "genres": [],
+      "href": "https://api.spotify.com/v1/artists/1JdJprpKvNgqBLGSDrMsv9",
+      "id": "1JdJprpKvNgqBLGSDrMsv9",
+      "images": [
+        {
+          "height": 640,
+          "url": "https://i.scdn.co/image/dfc3930f872ff115ef9e006a96131f6d107d8b55",
+          "width": 640
+        },
+        {
+          "height": 320,
+          "url": "https://i.scdn.co/image/916a3c91cee73db222ef2a4aba7e4cb16cb9eee3",
+          "width": 320
+        },
+        {
+          "height": 160,
+          "url": "https://i.scdn.co/image/aa8bb6bd6fac69cf7fc8fb31279abbf464863cfd",
+          "width": 160
+        }
+      ],
+      "name": "SUNG DAM",
+      "popularity": 34,
+      "type": "artist",
+      "uri": "spotify:artist:1JdJprpKvNgqBLGSDrMsv9"
+    }
+  ]
+},
+
+
+{
+  "items": []
+}]

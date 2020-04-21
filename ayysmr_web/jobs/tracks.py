@@ -1,4 +1,5 @@
 import requests
+from base64 import b64encode
 from datetime import datetime
 from flask import current_app, url_for
 
@@ -81,20 +82,19 @@ def retPlayHistory(self, start, batchsize, taskcount):
                     bparams = {
                         "grant_type": "refresh_token",
                         "refresh_token": user.refresh_token,
-                        "redirect_uri": url_for("sy.callback", _external = True),
-                        "client_id": current_app.config['SY_CLIENT_ID'],
-                        "client_secret": current_app.config['SY_CLIENT_SECRET']
                     }
 
                     response = requests.post(
                         "https://accounts.spotify.com/api/token",
+                        headers = { "Authorization": 
+                            "Basic " + b64encode(bytes(current_app.config['SY_CLIENT_ID'] + ":" + current_app.config['SY_CLIENT_SECRET'], "utf-8")).decode("utf-8") },
                         data = bparams).json()
 
                     # Update access token and expire times
-                    accessToken = response['access_token']
-                    expireTime = response['expires_in']
+                    accessToken = response.get('access_token')
+                    expireTime = response.get('expires_in')
 
-                    if accessToken == None:
+                    if response.get("error") == 'invalid_grant':
                         return "Failed to refresh access token"
 
                     user.access_token = accessToken

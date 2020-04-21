@@ -3,17 +3,17 @@ import urllib.parse
 import secrets
 import base64
 
-from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
-from flask import current_app
+from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify, current_app
 from sqlalchemy.sql import exists
 
 from .store import db
 from .models.user import User
 from .jobs.tracks import retTopTracks
+from .utils import spotify
 
-sy = Blueprint('sy', __name__, url_prefix='/sy')
+sybp = Blueprint('sy', __name__, url_prefix='/sy')
 
-@sy.route('/enable')
+@sybp.route('/enable')
 def enable():
     session['state'] = secrets.token_hex(16)
     scopes = ['user-read-recently-played', 'user-top-read']
@@ -25,63 +25,54 @@ def enable():
         "state": session['state'],
         "scope": " ".join(scopes)
     }
-    
-    return redirect("https://accounts.spotify.com/authorize?{}".format(urllib.parse.urlencode(qparams)))
 
-@sy.route('/callback')
+    rUrl = "https://accounts.spotify.com/authorize?{}".format(urllib.parse.urlencode(qparams))
+
+    return redirect(rUrl)
+
+@sybp.route('/callback')
 def callback():
     authcode = request.args.get('code', default = None)
     state = request.args.get('state')
 
-    if state == session['state']:
-        # Exchange authorization code for access token
-        bparams = {
-            "grant_type": "authorization_code",
-            "code": authcode,
-            "redirect_uri": url_for("sy.callback", _external = True),
-            "client_id": current_app.config['SY_CLIENT_ID'],
-            "client_secret": current_app.config['SY_CLIENT_SECRET']
-        }
+    if 'state' in session and state == session['state']:
+        result = spotify.get_access_token(authcode)
 
-        try:
-            response = requests.post(
-                "https://accounts.spotify.com/api/token",
-                data = bparams).json()
+        accessToken = result.get('access_token')
+        expireTime = result.get('expires_in')
+        refreshToken = result.get('refresh_token')
 
-            accessToken = response['access_token']
-            expireTime = response['expires_in']
-            refreshToken = response['refresh_token']
-
-            if accessToken == None:
-                flash("Failed to authorize")
-
-            response = requests.get(
-                "https://api.spotify.com/v1/me",
-                headers = { "Authorization": "Bearer {}".format(accessToken) }).json()
-            userId = response['id'] 
-           
-            # Add or update user tokens
-            if db.session.query(exists().where(User.id == userId)).scalar() is False:
-                user = User(id = userId, access_token = accessToken, refresh_token = refreshToken, expire_time = expireTime)
-                db.session.add(user)
-                db.session.commit()
-                # trigger top tracks job for first time user
-                retTopTracks.delay(accessToken)
-            else:
-                user = User.query.filter(User.id == userId).first()
-                user.access_token = accessToken
-                user.refresh_token = refreshToken
-                user.expire_time = expireTime
-                db.session.commit()
+        if accessToken == None:
+            flash("Failed to authorize", category = "error")
+        else: 
+            result = spotify.get_user_profile(accessToken)
+            userId = result.get('id')
+            
+            _update_user_tokens(userId, accessToken, expireTime, refreshToken)
 
             session['user'] = userId
             session['access_token'] = accessToken
             session['expire_time'] = expireTime
-
-        except requests.HTTPError as err:
-            flash("{} {}".format(err.msg, err.reason))
-
     else:
-        flash("Invalid state")
+        flash("Invalid state", category = "error")
 
     return redirect(url_for('hello'))
+
+def _update_user_tokens(userid, access_token, expire_time, refresh_token):
+    # Add or update user tokens
+    if db.session.query(exists().where(User.id == userid)).scalar() is False:
+        user = User(
+            id = userid,
+            access_token = access_token,
+            refresh_token = refresh_token,
+            expire_time = expire_time)
+        db.session.add(user)
+        db.session.commit()
+        # trigger top tracks job for first time user
+        retTopTracks.delay(access_token)
+    else:
+        user = User.query.filter(User.id == userid).first()
+        user.access_token = access_token
+        user.refresh_token = refresh_token
+        user.expire_time = expire_time
+        db.session.commit()

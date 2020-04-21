@@ -4,7 +4,7 @@ import hashlib
 from flask import Flask
 
 from .store import db, migrate
-from .sy import sy
+from .sy import sybp
 
 def make_app(config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -15,12 +15,16 @@ def make_app(config=None):
         app.config.from_mapping(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    app.secret_key = app.config['APP_SECRET_KEY']
+    if 'APP_SECRET_KEY' in app.config:
+        app.secret_key = app.config['APP_SECRET_KEY']
+    else:
+        # should probably warn that sessions will not work
+        pass
 
     db.init_app(app)
     migrate.init_app(app, db)
 
-    app.register_blueprint(sy)
+    app.register_blueprint(sybp)
 
     try:
         os.makedirs(app.instance_path)
