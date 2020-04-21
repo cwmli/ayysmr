@@ -16,4 +16,4 @@ def mock_get_user_profile(monkeypatch):
 
 @pytest.fixture
 def mock_get_db(monkeypatch):
-    monkeypatch.setattr(ayysmr_web.sy, "_update_user_tokens", lambda _: None)
+    monkeypatch.setattr(ayysmr_web.sy, "_update_user_tokens", lambda _a1, _a2, _a3, _a4: None)

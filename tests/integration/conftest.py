@@ -4,7 +4,7 @@ import os
 from ayysmr_web.app import make_app, make_celery
 from ayysmr_web.store import db
 
-with open(os.path.join(os.path.dirname(__file__), 'testdata.sql'), 'rb') as f:
+with open(os.path.join(os.path.dirname(__file__), 'data/testdata.sql'), 'rb') as f:
     _data_sql = f.read().decode('utf8')
 
 @pytest.fixture(scope='session')
@@ -23,15 +23,19 @@ def app():
         # reset the database
         db.drop_all()
         db.create_all()
-        with db.engine.connect() as connection:
-            with connection.begin():
-                connection.execute(_data_sql)
 
     yield app
 
 @pytest.fixture(scope='session')
 def client(app):
     return app.test_client()
+
+@pytest.fixture
+def prep_db(app):
+    with app.app_context():
+        with db.engine.connect() as connection:
+            with connection.begin():
+                connection.execute(_data_sql)
 
 @pytest.fixture(scope='session')
 def celery(app):
