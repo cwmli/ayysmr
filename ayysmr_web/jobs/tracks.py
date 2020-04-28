@@ -23,7 +23,7 @@ def retTopTracks(access_token):
         headers = reqHeader
     ).json()
 
-    tracks = extractTrackInformation(response['items'], access_token)
+    tracks = extractTrackInformation(response.get('items'), access_token)
 
     s = db.create_scoped_session()
     s.bulk_save_objects(tracks)
@@ -39,11 +39,12 @@ def retPlayHistory(self, start, batchsize, taskcount):
     s = db.create_scoped_session()
 
     index = start
-    
+    allusers = []
+
     while True:
         users = s.query(User).limit(batchsize).offset(index).all()
-        
-        if not users:
+
+        if len(users) < 1:
             break
 
         for user in users:
@@ -67,13 +68,14 @@ def retPlayHistory(self, start, batchsize, taskcount):
                         if 'error' in response and response['error']['status'] == 401:
                             raise UnauthorizedUser
                         # otherwise we were successful dump this into Tracks
-                        if not response['items']:
+                        if 'items' not in response or not response['items']:
                             break
 
                         items = map(lambda i: i['track'], response['items'])
                         tracks = tracks + extractTrackInformation(items, user.access_token)
                         time = response['cursors']['after']
 
+                    allusers.append(user.id)
                     # exit retry loop
                     break
 
@@ -102,14 +104,14 @@ def retPlayHistory(self, start, batchsize, taskcount):
                     db.session.commit()
 
                     continue
-            
             # commit play history and update time for the user
             user.last_play_history_upd = datetime.utcnow().isoformat()
             s.bulk_save_objects(tracks)
             s.commit()
-            s.close()
 
         index = index + batchsize * taskcount
+    s.close()
+    return "Updated track history for {}".format(allusers)
 
 """
 extractTrackInformation(items)
@@ -180,7 +182,7 @@ def extractTrackInformation(items, access_token):
     # Convert to Track models and commit to db
     for k, v in row.items():
         tracks.append(Track(
-            id = k,
+            track_id = k,
             name = v['name'],
             artist = v['artist'],
             preview_url = v['preview_url'],
