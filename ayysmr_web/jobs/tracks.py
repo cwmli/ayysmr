@@ -1,4 +1,5 @@
 import requests
+import logging
 from base64 import b64encode
 from datetime import datetime
 from flask import current_app, url_for
@@ -9,7 +10,7 @@ from ayysmr_web.store import db
 from .tasks import celery
 
 @celery.task
-def retTopTracks(access_token):
+def top_tracks(access_token):
 
     reqHeader = { "Authorization": "Bearer {}".format(access_token) }
 
@@ -31,7 +32,7 @@ def retTopTracks(access_token):
     s.close()
 
 @celery.task(bind = True)
-def retPlayHistory(self, start, batchsize, taskcount):
+def play_history(self, start, batchsize, taskcount):
 
     class UnauthorizedUser(requests.RequestException):
         pass
