@@ -1,5 +1,10 @@
+import logging
+
 from celery import Celery
 from celery.schedules import crontab
+
+taskLogger = logging.getLogger(__name__)
+taskLogger.setLevel(logging.DEBUG)
 
 celery = Celery(__name__, autofinalize=False)
 
