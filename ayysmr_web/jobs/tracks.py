@@ -10,8 +10,13 @@ from ayysmr_web.models.user import User
 from ayysmr_web.store import db
 from .tasks import celery, taskLogger
 
-@celery.task
-def top_tracks(access_token):
+@celery.task(bind = True)
+def top_tracks(self, access_token):
+
+    fh = logging.FileHandler('logs/{}'.format(self.request.id))
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(message)s'))
+    taskLogger.addHandler(fh)
 
     reqHeader = { "Authorization": "Bearer {}".format(access_token) }
 
@@ -23,7 +28,13 @@ def top_tracks(access_token):
         "https://api.spotify.com/v1/me/top/tracks",
         params = { "limit": 50, "time_range": "short_term" },
         headers = reqHeader
-    ).json()
+    )
+
+    taskLogger.debug(response.url)
+
+    response = response.json()
+
+    taskLogger.debug(list(map(lambda i: i['name'], response.get('items'))))
 
     tracks = extract_track_information(response.get('items'), access_token)
 
@@ -31,6 +42,8 @@ def top_tracks(access_token):
     s.bulk_save_objects(tracks)
     s.commit()
     s.close()
+
+    taskLogger.removeHandler(fh)
 
 @celery.task(bind = True)
 def play_history(self, start, batchsize, taskcount):
@@ -97,7 +110,7 @@ def play_history(self, start, batchsize, taskcount):
                         tracks = tracks + tmp
 
                         endtime = response['cursors']['before']
-                        
+
                         # exceeded
                         if int(endtime) < PREVTIME:
                             taskLogger("ending early")
