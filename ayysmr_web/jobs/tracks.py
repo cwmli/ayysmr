@@ -200,7 +200,6 @@ def extract_track_information(items, access_token):
 
     if not row:
         return tracks
-
     # Get audio features for all top tracks
 
     # Extract track audio features
@@ -210,6 +209,8 @@ def extract_track_information(items, access_token):
         headers = reqHeader
     ).json()
     for audioFeat in response['audio_features']:
+        if not audioFeat:
+            continue
         row[audioFeat['id']].update({
             "danceability": audioFeat['danceability'],
             "energy": audioFeat['energy'],
@@ -244,23 +245,23 @@ def extract_track_information(items, access_token):
     for k, v in row.items():
         tracks.append(Track(
             track_id = k,
-            name = v['name'],
-            artist = v['artist'],
-            preview_url = v['preview_url'],
-            artist_id = v['artist_id'],
-            genres = v['genres'],
-            popularity = v['popularity'],
-            danceability = v['danceability'],
-            energy = v['energy'],
-            key = v['key'],
-            loudness = v['loudness'],
-            mode = v['mode'],
-            speechiness = v['speechiness'],
-            acousticness = v['acousticness'],
-            instrumentalness = v['instrumentalness'],
-            liveness = v['liveness'],
-            valence = v['valence'],
-            tempo = v['tempo']
+            name = v.get('name'),
+            artist = v.get('artist'),
+            preview_url = v.get('preview_url'),
+            artist_id = v.get('artist_id'),
+            genres = v.get('genres'),
+            popularity = v.get('popularity'),
+            danceability = v.get('danceability'),
+            energy = v.get('energy'),
+            key = v.get('key'),
+            loudness = v.get('loudness'),
+            mode = v.get('mode'),
+            speechiness = v.get('speechiness'),
+            acousticness = v.get('acousticness'),
+            instrumentalness = v.get('instrumentalness'),
+            liveness = v.get('liveness'),
+            valence = v.get('valence'),
+            tempo = v.get('tempo')
         ))
         
     return tracks
