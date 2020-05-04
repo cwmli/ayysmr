@@ -9,13 +9,18 @@ Adjust recommendations based on:
 Changing the weights of the model
 
 GOAL:
-The user "LIKES" (will add) the song -> check users saved songs?
+The user "LIKES" (will add) the song 
+
+Build what the end user will like based on criteria retrieved from
+    -> top tracks/artists
+    -> saved songs
 
 Features
 
-- Genres
-- tempo/danceability/mood
-- language (?)
+- artist genre
+- artist popularity
+- everything from track audio-features
+- language
 
 Run celery worker with beat:
 

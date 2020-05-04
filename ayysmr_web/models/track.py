@@ -6,8 +6,9 @@ from ayysmr_web.store import db
 class Track(db.Model):
     __tablename__ = 'Tracks'
 
-    id = db.Column(db.String(32), primary_key = True, nullable = False)
-    timestamp = db.Column(db.DateTime, primary_key = True, nullable = False, server_default = func.now())
+    id = db.Column(db.Integer(), primary_key = True, autoincrement = True)
+    track_id = db.Column(db.String(32))
+    timestamp = db.Column(db.DateTime, nullable = False, server_default = func.now())
     name = db.Column(db.String(120))
     artist = db.Column(db.String(32))
     preview_url = db.Column(db.String(120))

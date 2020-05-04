@@ -8,7 +8,7 @@ from sqlalchemy.sql import exists
 
 from .store import db
 from .models.user import User
-from .jobs.tracks import retTopTracks
+from .jobs.tracks import top_tracks
 from .utils import spotify
 
 sybp = Blueprint('sy', __name__, url_prefix='/sy')
@@ -69,7 +69,7 @@ def _update_user_tokens(userid, access_token, expire_time, refresh_token):
         db.session.add(user)
         db.session.commit()
         # trigger top tracks job for first time user
-        retTopTracks.delay(access_token)
+        top_tracks.delay(access_token)
     else:
         user = User.query.filter(User.id == userid).first()
         user.access_token = access_token

@@ -22,7 +22,7 @@ class TestTrackJobs:
         with mock.patch("requests.Response.json") as MockedResponses:
             MockedResponses.side_effect = _data_json
 
-            tracks.retTopTracks('token')
+            tracks.top_tracks('token')
 
         # Assert that the track information is extracted and added to
         # the database
@@ -38,7 +38,7 @@ class TestTrackJobs:
         with mock.patch("requests.Response.json") as MockedResponses:
             MockedResponses.side_effect = _data_json
 
-            tracks.retPlayHistory(0, 10, 1)
+            tracks.play_history(0, 10, 1)
 
         # Assert that the track has been commited
         assert Track.query.filter(Track.id == "011zOYpFPsb1MLCidWlRoZ")
@@ -53,7 +53,7 @@ class TestTrackJobs:
         with mock.patch("requests.Response.json") as MockedResponses:
             MockedResponses.side_effect = _data_json
 
-            tracks.retPlayHistory(0, 10, 1)
+            tracks.play_history(0, 10, 1)
 
         # Assert that track is represented in the database
         assert Track.query.filter(Track.id == "011zOYpFPsb1MLCidWlRoZ")
@@ -71,7 +71,7 @@ class TestTrackJobs:
         with mock.patch("requests.Response.json") as MockedResponses:
             MockedResponses.side_effect = _data_json
 
-            tracks.retPlayHistory(0, 10, 1)
+            tracks.play_history(0, 10, 1)
 
         # # Assert that track is represented in the database
         # assert Track.query.filter(Track.id == "011zOYpFPsb1MLCidWlRoZ")
